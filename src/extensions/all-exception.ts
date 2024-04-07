@@ -17,9 +17,6 @@ export function errorHandle(
     messageConstants: {},
   }
 ) {
-  if (exceptionHandleOption) {
-  }
-
   const { development, messageConstants } = exceptionHandleOption;
   const _messageConstants = defu(messageConstants, detailMessage);
 
