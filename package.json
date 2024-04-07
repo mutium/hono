@@ -1,6 +1,6 @@
 {
   "name": "@mutium/hono",
-  "version": "0.0.2",
+  "version": "0.0.2-preview.2",
   "description": "",
   "type": "module",
   "exports": {

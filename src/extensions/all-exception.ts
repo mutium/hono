@@ -11,7 +11,15 @@ type ExceptionHandleOption = {
   messageConstants?: Partial<DetailMessage>;
 };
 
-export function errorHandle(exceptionHandleOption?: ExceptionHandleOption) {
+export function errorHandle(
+  exceptionHandleOption: ExceptionHandleOption = {
+    development() {},
+    messageConstants: {},
+  }
+) {
+  if (exceptionHandleOption) {
+  }
+
   const { development, messageConstants } = exceptionHandleOption;
   const _messageConstants = defu(messageConstants, detailMessage);
 
@@ -51,7 +59,12 @@ export function errorHandle(exceptionHandleOption?: ExceptionHandleOption) {
   }) as ErrorHandler;
 }
 
-export function notFound(exceptionHandleOption?: ExceptionHandleOption) {
+export function notFound(
+  exceptionHandleOption: ExceptionHandleOption = {
+    development() {},
+    messageConstants: {},
+  }
+) {
   const { development, messageConstants } = exceptionHandleOption;
   const _messageConstants = defu(messageConstants, detailMessage);
 
