@@ -3,46 +3,68 @@ import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
 import { ProblemDocument } from "http-problem-details";
+import { DetailMessage, detailMessage } from "./constants";
+import defu from "defu";
 
-export const errorHandle = ((e, ctx) => {
-  if (e instanceof ZodError) {
+type ExceptionHandleOption = {
+  development?(): void;
+  messageConstants?: Partial<DetailMessage>;
+};
+
+export function errorHandle(exceptionHandleOption?: ExceptionHandleOption) {
+  const { development, messageConstants } = exceptionHandleOption;
+  const _messageConstants = defu(messageConstants, detailMessage);
+
+  return ((e, ctx) => {
+    development?.();
+
+    if (e instanceof ZodError) {
+      return ctx.json(
+        new ProblemDocument({
+          detail: _messageConstants["Complete request parameters not provided"],
+          instance: ctx.req.path,
+          status: StatusCodes.BAD_REQUEST,
+        }),
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    if (e instanceof HTTPException) {
+      return ctx.json(
+        new ProblemDocument({
+          detail: e.message,
+          instance: ctx.req.path,
+          status: e.status,
+        }),
+        e.status
+      );
+    }
+
     return ctx.json(
       new ProblemDocument({
-        detail: "Complete request parameters not provided",
+        detail: _messageConstants["Unknown error please contact to admin"],
         instance: ctx.req.path,
         status: StatusCodes.BAD_REQUEST,
       }),
-      StatusCodes.BAD_REQUEST
+      StatusCodes.SERVICE_UNAVAILABLE
     );
-  }
+  }) as ErrorHandler;
+}
 
-  if (e instanceof HTTPException) {
+export function notFound(exceptionHandleOption?: ExceptionHandleOption) {
+  const { development, messageConstants } = exceptionHandleOption;
+  const _messageConstants = defu(messageConstants, detailMessage);
+
+  return ((ctx) => {
+    development?.();
+
     return ctx.json(
       new ProblemDocument({
-        detail: e.message,
+        detail: _messageConstants["Not found"],
         instance: ctx.req.path,
-        status: e.status,
+        status: StatusCodes.NOT_FOUND,
       }),
-      e.status
+      StatusCodes.NOT_FOUND
     );
-  }
-
-  return ctx.json(
-    new ProblemDocument({
-      detail: "Unknown error please contact to admin",
-      instance: ctx.req.path,
-      status: StatusCodes.BAD_REQUEST,
-    }),
-    StatusCodes.SERVICE_UNAVAILABLE
-  );
-}) as ErrorHandler;
-
-export const notFound = ((ctx) =>
-  ctx.json(
-    new ProblemDocument({
-      detail: "Not found",
-      instance: ctx.req.path,
-      status: StatusCodes.NOT_FOUND,
-    }),
-    StatusCodes.NOT_FOUND
-  )) as NotFoundHandler;
+  }) as NotFoundHandler;
+}
