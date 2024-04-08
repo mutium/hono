@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Read the [developer roadmap 🧑‍💻](./docs/api-reference.md)
+Read the [api reference 🧑‍💻](./docs/api-reference.md)
 
 ## Contributing
 
