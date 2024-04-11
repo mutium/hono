@@ -9,19 +9,27 @@ import defu from "defu";
 type ExceptionHandleOption = {
   development?(): void;
   messageConstants?: Partial<DetailMessage>;
+  extensions?: ErrorHandler;
 };
+export type ErrorHandleExceptionHandleOption = ExceptionHandleOption;
+export type NotFoundExceptionHandleOption = Omit<
+  ExceptionHandleOption,
+  "extensions"
+>;
 
 export function errorHandle(
-  exceptionHandleOption: ExceptionHandleOption = {
-    development() {},
-    messageConstants: {},
-  }
+  exceptionHandleOption?: ErrorHandleExceptionHandleOption
 ) {
-  const { development, messageConstants } = exceptionHandleOption;
-  const _messageConstants = defu(messageConstants, detailMessage);
+  const _messageConstants = defu(
+    exceptionHandleOption?.messageConstants,
+    detailMessage
+  );
 
   return ((e, ctx) => {
-    development?.();
+    exceptionHandleOption?.development?.();
+    const resp = exceptionHandleOption?.extensions?.(e, ctx);
+
+    if (resp) return resp;
 
     if (e instanceof ZodError) {
       return ctx.json(
@@ -57,16 +65,15 @@ export function errorHandle(
 }
 
 export function notFound(
-  exceptionHandleOption: ExceptionHandleOption = {
-    development() {},
-    messageConstants: {},
-  }
+  exceptionHandleOption?: NotFoundExceptionHandleOption
 ) {
-  const { development, messageConstants } = exceptionHandleOption;
-  const _messageConstants = defu(messageConstants, detailMessage);
+  const _messageConstants = defu(
+    exceptionHandleOption?.messageConstants,
+    detailMessage
+  );
 
   return ((ctx) => {
-    development?.();
+    exceptionHandleOption?.development?.();
 
     return ctx.json(
       new ProblemDocument({
