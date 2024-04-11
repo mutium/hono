@@ -1,6 +1,6 @@
 {
   "name": "@mutium/hono",
-  "version": "0.0.2-preview.2",
+  "version": "0.0.3",
   "description": "",
   "type": "module",
   "exports": {
@@ -14,17 +14,16 @@
     "build": "tsup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "keywords": [],
   "author": "Mutium",
   "license": "MIT",
   "devDependencies": {
-    "hono": "^4.2.2",
+    "hono": "^4.2.3",
     "tsup": "^8.0.2",
     "typescript": "^5.4.4"
-  },
-  "peerDependencies": {
-    "hono": "^4.2.2"
   },
   "dependencies": {
     "defu": "^6.1.4",
@@ -33,9 +32,14 @@
     "zod": "^3.22.4"
   },
   "tsup": {
-    "entry": ["./src/index.ts"],
+    "entry": [
+      "./src/index.ts"
+    ],
     "target": "es2021",
-    "format": ["cjs", "esm"],
+    "format": [
+      "cjs",
+      "esm"
+    ],
     "clean": true,
     "dts": true,
     "minify": true,
