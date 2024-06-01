@@ -1,9 +1,9 @@
 import {
   ErrorHandleExceptionHandleOption,
   NotFoundExceptionHandleOption,
-} from "./extensions/all-exception";
+} from "./infra/all-exception";
 import { Hono } from "hono";
-import { errorHandle, notFound } from "./extensions";
+import { errorHandle, notFound } from "./infra";
 
 export type BuilderFn = { (app: Hono): Promise<void> };
 
