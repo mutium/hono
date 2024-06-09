@@ -1,8 +1,10 @@
 # @mutium/hono
 
+Some extension methods for Hono Application.
+
 ## Introduction
 
-Read the [api reference 🧑‍💻](./docs/api-reference.md)
+Read the [API Reference 🧑‍💻](./docs/api-reference.md)
 
 ## Contributing
 

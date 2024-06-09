@@ -1,37 +1,56 @@
+import { Hono } from "hono";
 import {
+  errorHandle,
+  notFound,
   ErrorHandleExceptionHandleOption,
   NotFoundExceptionHandleOption,
-} from "./infra/all-exception";
-import { Hono } from "hono";
-import { errorHandle, notFound } from "./infra";
+} from "./infrastructure";
 
-export type BuilderFn = { (app: Hono): Promise<void> };
+export type BuilderFn = { (app: Hono): void };
+export type BuilderFnAsync = { (app: Hono): Promise<void> };
 
-interface BootstrapBuilderOption {
-  beforeDefaultBuilder?: BuilderFn;
-  afterDefaultBuilder?: BuilderFn;
+type BootstrapBuilderOption = {
+  beforeBuilder?: BuilderFn | BuilderFnAsync;
+  afterBuilder?: BuilderFn | BuilderFnAsync;
   errorHandleOption?: ErrorHandleExceptionHandleOption;
   notFoundHandleOption?: NotFoundExceptionHandleOption;
-}
+};
 
 type HonoAppBuilder = {
-  bootstrap(builderOption?: BootstrapBuilderOption): Promise<HonoAppBuilder>;
-  build(): Hono;
+  configure(builderOption?: BootstrapBuilderOption): HonoAppBuilder;
+  build(): Promise<Hono>;
 };
 
 export function createHonoApp(): HonoAppBuilder {
   const app = new Hono();
+  const nextConfiguration: {} & BootstrapBuilderOption = {};
 
   return {
-    async bootstrap(builderOption) {
-      await builderOption?.beforeDefaultBuilder?.(app);
-      app.onError(errorHandle(builderOption?.errorHandleOption));
-      app.notFound(notFound(builderOption?.notFoundHandleOption));
-      await builderOption?.afterDefaultBuilder?.(app);
+    configure(builderOption) {
+      nextConfiguration.afterBuilder = builderOption?.afterBuilder;
+      nextConfiguration.beforeBuilder = builderOption?.beforeBuilder;
+      nextConfiguration.errorHandleOption = builderOption?.errorHandleOption;
+      nextConfiguration.notFoundHandleOption =
+        builderOption?.notFoundHandleOption;
 
       return this;
     },
-    build() {
+    async build() {
+      if (nextConfiguration?.beforeBuilder) {
+        const beforeBuilderResult = nextConfiguration.beforeBuilder(app);
+
+        if (beforeBuilderResult instanceof Promise) await beforeBuilderResult;
+      }
+
+      app.onError(errorHandle(nextConfiguration?.errorHandleOption));
+      app.notFound(notFound(nextConfiguration?.notFoundHandleOption));
+
+      if (nextConfiguration?.afterBuilder) {
+        const afterBuilderResult = nextConfiguration.afterBuilder(app);
+
+        if (afterBuilderResult instanceof Promise) await afterBuilderResult;
+      }
+
       return app;
     },
   };
